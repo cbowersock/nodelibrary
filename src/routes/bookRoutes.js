@@ -1,52 +1,61 @@
 const express = require('express');
+const { MongoClient, ObjectID } = require('mongodb');
+const debug = require('debug')('app:bookRoutes');
 
 const bookRouter = express.Router();
 
 function router(nav) {
-  const books = [
-    {
-      title: 'blade runner',
-      genre: 'sci fi',
-      author: 'phil dick',
-      read: false
-    },
-    {
-      title: 'harry potter',
-      genre: 'childrens',
-      author: 'jr rowling',
-      read: true
-    },
-    {
-      title: 'lord of teh rings',
-      genre: 'fantasy',
-      author: 'tolken',
-      read: false
-    }
-  ];
-
   bookRouter.route('/')
     .get((req, res) => {
-      res.render(
-        'bookListView',
-        {
-          title: 'library',
-          nav,
-          books
+      const url = 'mongodb://localhost:27017';
+      const dbName = 'libraryApp';
+
+      (async function mongo() {
+        let client;
+        try {
+          client = await MongoClient.connect(url);
+          const db = client.db(dbName);
+          const col = await db.collection('books');
+          const books = await col.find().toArray();
+          res.render(
+            'bookListView',
+            {
+              title: 'library',
+              nav,
+              books
+            }
+          );
+        } catch (err) {
+          debug(err.stack);
         }
-      );
+        client.close();
+      }());
     });
 
   bookRouter.route('/:id')
     .get((req, res) => {
       const { id } = req.params;
-      res.render(
-        'bookView',
-        {
-          title: 'library',
-          nav,
-          book: books[id]
+      const url = 'mongodb://localhost:27017';
+      const dbName = 'libraryApp';
+      (async function mongo() {
+        let client;
+        try {
+          client = await MongoClient.connect(url);
+          const db = client.db(dbName);
+          const col = await db.collection('books');
+          const book = await col.findOne({ _id: new ObjectID(id) });
+          res.render(
+            'bookView',
+            {
+              title: 'library',
+              nav,
+              book
+            }
+          );
+        } catch (err) {
+          debug(err.stack);
         }
-      );
+      }());
     });
   return bookRouter;
 }
