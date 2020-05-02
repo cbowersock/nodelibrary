@@ -9,12 +9,14 @@ const books = [
     title: 'blade runner',
     genre: 'sci fi',
     author: 'phil dick',
+    bookId: 54,
     read: false
   },
   {
     title: 'harry potter',
     genre: 'childrens',
     author: 'jr rowling',
+    bookId: 24280,
     read: true
   },
   {
